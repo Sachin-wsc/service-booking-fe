@@ -1,52 +1,56 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
 import { Password } from "primereact/password";
 import { InputMask } from "primereact/inputmask";
-import { Dropdown } from "primereact/dropdown";
+import { Checkbox } from "primereact/checkbox";
+import { Steps } from "primereact/steps";
 import Address from "../../components/Address";
+import { registerUser, clearError } from "../../features/authSlice";
 
 const SignUpProvider = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
   const [activeStep, setActiveStep] = useState(0);
+  const [checked, setChecked] = useState(false);
 
   const [form, setForm] = useState({
-    Name: "",
+    name: "",
     email: "",
     phone: "",
-    serviceCategory: null,
     password: "",
     agreeTerms: false,
     street: "",
     city: "",
     state: "",
+    country: "",
+    zip: "",
+    businessName: "",
+    description: "",
   });
 
   const [errors, setErrors] = useState({
-    Name: "",
+    name: "",
     email: "",
     phone: "",
-    serviceCategory: "",
     password: "",
     agreeTerms: "",
     street: "",
     city: "",
     state: "",
+    country: "",
+    zip: "",
+    businessName: "",
+    description: "",
   });
 
   const steps = [
     { label: "Personal Information", icon: "pi pi-user" },
     { label: "Address", icon: "pi pi-map-marker" },
-  ];
-
-  const serviceCategories = [
-    { label: "Cleaning Service", value: "cleaning" },
-    { label: "Plumbing", value: "plumbing" },
-    { label: "Electrical", value: "electrical" },
-    { label: "Painting", value: "painting" },
-    { label: "Carpentry", value: "carpentry" },
-    { label: "Home Repair", value: "repair" },
-    { label: "Other", value: "other" },
+    { label: "Business Details", icon: "pi pi-briefcase" },
   ];
 
   const validateEmail = (email) => {
@@ -61,12 +65,8 @@ const SignUpProvider = () => {
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
-  };
-
-  const handleDropdownChange = (e) => {
-    setForm({ ...form, serviceCategory: e.value });
-    if (errors.serviceCategory) {
-      setErrors({ ...errors, serviceCategory: "" });
+    if (error) {
+      dispatch(clearError());
     }
   };
 
@@ -81,10 +81,10 @@ const SignUpProvider = () => {
     let newErrors = {};
 
     if (step === 0) {
-      if (!form.Name.trim()) {
-        newErrors.Name = "Name is required";
-      } else if (form.Name.trim().length < 3) {
-        newErrors.Name = "Name must be at least 3 characters";
+      if (!form.name.trim()) {
+        newErrors.name = "Name is required";
+      } else if (form.name.trim().length < 3) {
+        newErrors.name = "Name must be at least 3 characters";
       }
 
       if (!form.email.trim()) {
@@ -95,10 +95,6 @@ const SignUpProvider = () => {
 
       if (!form.phone.trim()) {
         newErrors.phone = "Phone number is required";
-      }
-
-      if (!form.serviceCategory) {
-        newErrors.serviceCategory = "Please select a service category";
       }
 
       if (!form.password.trim()) {
@@ -122,6 +118,26 @@ const SignUpProvider = () => {
       if (!form.state.trim()) {
         newErrors.state = "State is required";
       }
+
+      if (!form.country.trim()) {
+        newErrors.country = "Country is required";
+      }
+
+      if (!form.zip.trim()) {
+        newErrors.zip = "Zip code is required";
+      }
+    } else if (step === 2) {
+      if (!form.businessName.trim()) {
+        newErrors.businessName = "Business name is required";
+      } else if (form.businessName.trim().length < 3) {
+        newErrors.businessName = "Business name must be at least 3 characters";
+      }
+
+      if (!form.description.trim()) {
+        newErrors.description = "Business description is required";
+      } else if (form.description.trim().length < 10) {
+        newErrors.description = "Description must be at least 10 characters";
+      }
     }
 
     setErrors(newErrors);
@@ -138,144 +154,115 @@ const SignUpProvider = () => {
     setActiveStep(activeStep - 1);
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (validateStep(activeStep)) {
-      console.log("Provider Sign Up Data:", form);
-      // Here you would typically send the data to your backend
+      const result = await dispatch(
+        registerUser({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone,
+          role: "provider",
+          street: form.street,
+          city: form.city,
+          state: form.state,
+          country: form.country,
+          zip: form.zip,
+          Buisness_name: form.businessName,
+          description: form.description,
+        })
+      );
+
+      if (result.payload?.message) {
+        // Store flag for pending approval check during login
+        localStorage.setItem("providerPendingApproval", form.email);
+        
+        navigate("/login", { 
+          state: { 
+            message: "Registration successful! Please log in with your credentials.",
+            email: form.email 
+          } 
+        });
+      }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50 px-3 sm:px-4 py-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 px-2 sm:px-4 py-2">
       <div className="w-full max-w-6xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT SIDE */}
-        <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-orange-400 via-red-400 to-pink-400 p-6 sm:p-10 items-center justify-center relative">
+        <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-blue-500 via-cyan-500 to-sky-400 p-6 sm:p-8 items-center justify-center relative">
           <div className="text-center">
-            <div className="w-48 sm:w-60 h-48 sm:h-60 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <i className="pi pi-briefcase text-5xl sm:text-6xl text-white"></i>
+            <div className="w-40 sm:w-56 h-40 sm:h-56 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-5">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-36 sm:w-52 h-36 sm:h-52 object-contain"
+              />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white drop-shadow-lg">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-white drop-shadow-lg">
               Join As Provider
             </h2>
-            <p className="text-sm sm:text-base opacity-95 text-white drop-shadow">
+            <p className="text-xs sm:text-sm opacity-95 text-white drop-shadow">
               Offer your services and grow your business
             </p>
           </div>
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="w-full md:w-1/2 bg-white rounded-2xl md:rounded-none md:rounded-r-3xl p-6 sm:p-10">
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+        <div className="w-full md:w-1/2 bg-white rounded-2xl md:rounded-none md:rounded-r-3xl p-4 sm:p-6">
+          <div className="mb-2 sm:mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Create Provider Account
             </h2>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 mt-1">
               Step {activeStep + 1} of {steps.length}
             </p>
           </div>
 
-          {/* Steps Component */}
-          <div className="mb-8 px-2">
-            <div className="relative flex justify-between items-start">
-              {/* Connector Lines */}
-              <div className="absolute top-6 left-0 right-0 h-1 bg-gray-300"></div>
-              {steps.map((step, index) => (
-                <div
-                  key={index}
-                  className={`relative flex flex-col items-center flex-1 ${
-                    index < steps.length - 1 ? "" : ""
-                  }`}
-                >
-                  {/* Active Line */}
-                  {index < activeStep && (
-                    <div
-                      className="absolute top-6 left-0 h-1 bg-green-500 transition-all duration-300"
-                      style={{
-                        width:
-                          index === 0
-                            ? "calc(100% - 24px)"
-                            : "calc(100% - 12px)",
-                        marginLeft: index === 0 ? "24px" : "6px",
-                      }}
-                    ></div>
-                  )}
-                  {index === activeStep && (
-                    <div
-                      className="absolute top-6 left-0 h-1 bg-orange-500 transition-all duration-300"
-                      style={{
-                        width: "50%",
-                        marginLeft: "24px",
-                      }}
-                    ></div>
-                  )}
-
-                  {/* Step Circle */}
-                  <div
-                    className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg transition-all duration-300 ${
-                      index <= activeStep
-                        ? index === activeStep
-                          ? "bg-orange-500 text-white scale-110 shadow-lg"
-                          : "bg-green-500 text-white"
-                        : "bg-gray-300 text-gray-600"
-                    }`}
-                  >
-                    {index < activeStep ? (
-                      <i className="pi pi-check text-lg text-black"></i>
-                    ) : index === activeStep ? (
-                      <i className={`pi ${step.icon} text-lg text-black`}></i>
-                    ) : (
-                      <span className="text-base">{index + 1}</span>
-                    )}
-                  </div>
-
-                  {/* Step Label */}
-                  <div className="mt-3 text-center">
-                    <p
-                      className={`text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
-                        index <= activeStep
-                          ? index === activeStep
-                            ? "text-orange-600"
-                            : "text-green-600"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {step.label}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <i className="pi pi-exclamation-circle text-red-600 text-sm mt-0.5"></i>
+              <p className="text-red-700 text-xs">
+                {typeof error === "string" ? error : error?.message}
+              </p>
             </div>
+          )}
+
+          {/* Steps Component */}
+          <div className="mb-3 sm:mb-4">
+            <Steps model={steps} activeIndex={activeStep} />
           </div>
 
           {/* Form Content */}
-          <div className="min-h-75">
+          <div>
             {activeStep === 0 ? (
               // Step 1: Personal Information
-              <div className="space-y-4 sm:space-y-5">
+              <div className="space-y-2 sm:space-y-3">
                 {/* Name Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Name
                   </label>
                   <InputText
-                    name="Name"
-                    value={form.Name}
+                    name="name"
+                    value={form.name}
                     onChange={handleChange}
                     placeholder="Enter your name"
-                    className="w-full"
-                    invalid={!!errors.Name}
+                    className="w-full text-sm"
+                    invalid={!!errors.name}
                   />
-                  {errors.Name && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                  {errors.name && (
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
-                      {errors.Name}
+                      {errors.name}
                     </p>
                   )}
                 </div>
 
                 {/* Email Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Email Address
                   </label>
                   <InputText
@@ -283,11 +270,11 @@ const SignUpProvider = () => {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    className="w-full"
+                    className="w-full text-sm"
                     invalid={!!errors.email}
                   />
                   {errors.email && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.email}
                     </p>
@@ -296,7 +283,7 @@ const SignUpProvider = () => {
 
                 {/* Phone Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Phone Number
                   </label>
                   <InputMask
@@ -305,41 +292,20 @@ const SignUpProvider = () => {
                     onChange={handleChange}
                     mask="99999 99999"
                     placeholder="98765 43210"
-                    className="w-full"
+                    className="w-full text-sm"
                     invalid={!!errors.phone}
                   />
                   {errors.phone && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.phone}
                     </p>
                   )}
                 </div>
 
-                {/* Service Category Dropdown */}
-                <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
-                    Service Category
-                  </label>
-                  <Dropdown
-                    value={form.serviceCategory}
-                    onChange={handleDropdownChange}
-                    options={serviceCategories}
-                    placeholder="Select service category"
-                    className="w-full"
-                    invalid={!!errors.serviceCategory}
-                  />
-                  {errors.serviceCategory && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
-                      <i className="pi pi-exclamation-circle text-xs"></i>
-                      {errors.serviceCategory}
-                    </p>
-                  )}
-                </div>
-
                 {/* Password Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Password
                   </label>
 
@@ -348,19 +314,18 @@ const SignUpProvider = () => {
                     value={form.password}
                     onChange={handleChange}
                     placeholder="Enter password"
-                    // toggleMask
                     feedback={false}
-                    inputClassName="w-full px-4 py-3 rounded-lg"
+                    inputClassName="w-full px-3 py-2 rounded-lg text-sm"
                     invalid={!!errors.password}
                     inputStyle={{
-                      height: "48px",
+                      height: "38px",
                       width: "100%",
                       paddingRight: "19rem",
                     }}
                   />
 
                   {errors.password && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.password}
                     </p>
@@ -368,77 +333,141 @@ const SignUpProvider = () => {
                 </div>
 
                 {/* Terms Checkbox */}
-                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
+                <div className="bg-blue-50! p-0 sm:p-3 rounded-lg border border-blue-300!">
+                  <div className="flex items-start gap-2">
+                    <Checkbox
                       id="agreeTerms"
-                      checked={form.agreeTerms}
-                      onChange={handleCheckboxChange}
-                      className="w-5 h-5 text-orange-500 rounded mt-1 cursor-pointer"
-                    />
+                      invalid={!checked}
+                      onChange={(e) => {
+                        setChecked(e.checked);
+                        handleCheckboxChange(e);
+                      }}
+                      checked={checked && form.agreeTerms}
+                      className=" text-blue-500 rounded cursor-pointer"
+                    ></Checkbox>
+
                     <label
                       htmlFor="agreeTerms"
-                      className="text-sm text-gray-700 cursor-pointer"
+                      className="text-xs text-gray-700 cursor-pointer"
                     >
                       I agree to the terms and conditions and confirm that I
                       have a valid business license
                     </label>
                   </div>
                   {errors.agreeTerms && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.agreeTerms}
                     </p>
                   )}
                 </div>
               </div>
-            ) : (
+            ) : activeStep === 1 ? (
               // Step 2: Address
               <Address
                 form={form}
                 errors={errors}
                 handleChange={handleChange}
               />
+            ) : (
+              // Step 3: Business Details
+              <div className="space-y-2 sm:space-y-3">
+                {/* Business Name Field */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
+                    Business Name
+                  </label>
+                  <InputText
+                    name="businessName"
+                    value={form.businessName}
+                    onChange={handleChange}
+                    placeholder="Enter your business name"
+                    className="w-full text-sm"
+                    invalid={!!errors.businessName}
+                  />
+                  {errors.businessName && (
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
+                      <i className="pi pi-exclamation-circle text-xs"></i>
+                      {errors.businessName}
+                    </p>
+                  )}
+                </div>
+
+                {/* Business Description Field */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
+                    Business Description
+                  </label>
+                  <InputTextarea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    placeholder="Describe your business and the services you provide"
+                    rows={5}
+                    className="w-full text-sm"
+                    invalid={!!errors.description}
+                  />
+                  {errors.description && (
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
+                      <i className="pi pi-exclamation-circle text-xs"></i>
+                      {errors.description}
+                    </p>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex gap-4 mt-8 justify-between">
-            <button
-              onClick={handlePrev}
-              disabled={activeStep === 0}
-              className="flex items-center justify-center px-8 py-3 border-2 border-orange-500 text-orange-600 font-bold rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-orange-50 active:scale-95 min-w-[140px]"
-            >
-              <i className="pi pi-arrow-left mr-2"></i>
-              Previous
-            </button>
+          <div className="flex gap-2 mt-3 sm:mt-4 justify-between">
+            {activeStep === 0 ? (
+              <div></div>
+            ) : (
+              <button
+                onClick={handlePrev}
+                disabled={activeStep === 0}
+                className="flex items-center justify-center px-4 sm:px-6 py-2 border-2 border-blue-500 text-blue-600 font-semibold text-sm rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-50 active:scale-95"
+              >
+                <i className="pi pi-arrow-left mr-1"></i>
+                Prev
+              </button>
+            )}
 
             {activeStep === steps.length - 1 ? (
               <button
                 onClick={handleSignUp}
-                className="flex items-center justify-center px-8 py-3 bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 min-w-[140px]"
+                disabled={loading}
+                className="flex items-center justify-center px-4 sm:px-6 py-2 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold text-sm rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <i className="pi pi-check mr-2"></i>
-                Create Account
+                {loading ? (
+                  <>
+                    <i className="pi pi-spinner pi-spin mr-1"></i>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <i className="pi pi-check mr-1"></i>
+                    Submit
+                  </>
+                )}
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="flex items-center justify-center px-8 py-3 bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 min-w-[140px]"
+                className="flex items-center justify-center px-4 sm:px-6 py-2 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold text-sm rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95"
               >
                 Next
-                <i className="pi pi-arrow-right ml-2"></i>
+                <i className="pi pi-arrow-right ml-1"></i>
               </button>
             )}
           </div>
 
           {/* Login Link */}
-          <div className="text-center text-sm text-gray-600 mt-6">
+          <div className="text-center text-xs sm:text-sm text-gray-600 mt-2 sm:mt-3">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent hover:underline transition"
+              className="font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent hover:underline transition"
             >
               Login here
             </Link>

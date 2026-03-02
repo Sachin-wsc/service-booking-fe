@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { loginUser, clearError } from "../../features/authSlice";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -28,6 +33,9 @@ const Login = () => {
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
+    if (error) {
+      dispatch(clearError());
+    }
   };
 
   const validate = () => {
@@ -49,21 +57,54 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     if (validate()) {
-      console.log("Login Data:", form);
-      // navigate("/dashboard");
+      const result = await dispatch(
+        loginUser({
+          email: form.email,
+          password: form.password,
+        })
+      );
+
+      if (result.payload?.user) {
+        const userRole = result.payload.user.role;
+        
+        // Check if provider was recently registered and is pending approval
+        if (userRole === "provider") {
+          const recentlyRegisteredProvider = localStorage.getItem("providerPendingApproval");
+          if (recentlyRegisteredProvider === form.email) {
+            // Clear the flag
+            localStorage.removeItem("providerPendingApproval");
+            // Redirect to pending page
+            navigate("/provider/pending");
+            return;
+          }
+        }
+        
+        if (userRole === "admin") {
+          navigate("/admin/dashboard");
+        } else if (userRole === "customer") {
+          navigate("/customer/dashboard");
+        } else if (userRole === "provider") {
+          navigate("/provider/dashboard");
+        }
+      }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50 px-3 sm:px-4 py-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 px-3 sm:px-4 py-4">
       <div className="w-full max-w-6xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT SIDE */}
-        <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-amber-400 via-yellow-400 to-orange-400 p-6 sm:p-10 items-center justify-center relative">
+        <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-blue-500 via-cyan-500 to-sky-400 p-6 sm:p-10 items-center justify-center relative">
           <div className="text-center">
-            <div className="w-48 sm:w-60 h-48 sm:h-60 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <i className="pi pi-user text-5xl sm:text-6xl text-white"></i>
+            <div className="w-40 sm:w-60 h-48 sm:h-60 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-40 sm:w-52 h-40 sm:h-52 object-contain"
+              />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white drop-shadow-lg">
               Welcome Back!
@@ -77,7 +118,7 @@ const Login = () => {
         {/* RIGHT SIDE */}
         <div className="w-full md:w-1/2 bg-white rounded-2xl md:rounded-none md:rounded-r-3xl p-6 sm:p-10">
           <div className="mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Login your account
             </h2>
             <p className="text-sm text-gray-500 mt-2">
@@ -85,13 +126,16 @@ const Login = () => {
             </p>
           </div>
 
-          <form
-            className="space-y-5 sm:space-y-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleLogin();
-            }}
-          >
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <i className="pi pi-exclamation-circle text-red-600 mt-1"></i>
+              <p className="text-red-700 text-sm">
+                {typeof error === "string" ? error : error?.message}
+              </p>
+            </div>
+          )}
+
+          <form className="space-y-5 sm:space-y-6" onSubmit={handleLogin}>
             {/* Email Field */}
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-2">
@@ -103,11 +147,11 @@ const Login = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-lg"
+                className="w-full rounded-lg"
                 invalid={!!errors.email}
               />
               {errors.email && (
-                <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                <p className="text-red-600! text-sm font-medium mt-2 flex items-center gap-1">
                   <i className="pi pi-exclamation-circle text-xs"></i>
                   {errors.email}
                 </p>
@@ -125,7 +169,6 @@ const Login = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Enter password"
-                // toggleMask
                 feedback={false}
                 className="w-full"
                 inputClassName="w-full px-4 py-3 rounded-lg"
@@ -138,31 +181,30 @@ const Login = () => {
               />
 
               {errors.password && (
-                <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                <p className="text-red-600! text-sm font-medium mt-2 flex items-center gap-1">
                   <i className="pi pi-exclamation-circle text-xs"></i>
                   {errors.password}
                 </p>
               )}
             </div>
 
-            <button
+            <Button
               type="submit"
-              className="w-full bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base"
-            >
-              <i className="pi pi-sign-in"></i>
-              Login
-            </button>
+              label="Login"
+              loading={loading}
+              className="w-full bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95"
+            />
 
             <div className="flex flex-col sm:flex-row justify-between text-sm text-gray-600 gap-4 mt-4">
               <Link
                 to="/signup"
-                className="hover:text-orange-600 transition font-semibold flex items-center gap-1"
+                className="font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent hover:underline transition gap-1 flex items-center"
               >
                 <i className="pi pi-user-plus text-xs"></i>
                 Create Account
               </Link>
               <button
-                className="hover:text-orange-600 transition font-semibold flex items-center gap-1"
+                className="hover:text-blue-600 transition font-semibold flex items-center gap-1"
                 type="button"
               >
                 <i className="pi pi-lock text-xs"></i>

@@ -1,32 +1,42 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { InputMask } from "primereact/inputmask";
+import { Steps } from "primereact/steps";
 import Address from "../../components/Address";
+import { registerUser, clearError } from "../../features/authSlice";
 
 const SignUpCustomer = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
   const [activeStep, setActiveStep] = useState(0);
 
   const [form, setForm] = useState({
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     password: "",
+    role: "customer",
     street: "",
     city: "",
     state: "",
+    country: "",
+    zip: "",
   });
 
   const [errors, setErrors] = useState({
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     password: "",
     street: "",
     city: "",
     state: "",
+    country: "",
+    zip: "",
   });
 
   const steps = [
@@ -46,16 +56,19 @@ const SignUpCustomer = () => {
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
+    if (error) {
+      dispatch(clearError());
+    }
   };
 
   const validateStep = (step) => {
     let newErrors = {};
 
     if (step === 0) {
-      if (!form.fullName.trim()) {
-        newErrors.fullName = "Full name is required";
-      } else if (form.fullName.trim().length < 3) {
-        newErrors.fullName = "Full name must be at least 3 characters";
+      if (!form.name.trim()) {
+        newErrors.name = "Full name is required";
+      } else if (form.name.trim().length < 3) {
+        newErrors.name = "Full name must be at least 3 characters";
       }
 
       if (!form.email.trim()) {
@@ -85,6 +98,14 @@ const SignUpCustomer = () => {
       if (!form.state.trim()) {
         newErrors.state = "State is required";
       }
+
+      if (!form.country.trim()) {
+        newErrors.country = "Country is required";
+      }
+
+      if (!form.zip.trim()) {
+        newErrors.zip = "Zip code is required";
+      }
     }
 
     setErrors(newErrors);
@@ -101,143 +122,101 @@ const SignUpCustomer = () => {
     setActiveStep(activeStep - 1);
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (validateStep(activeStep)) {
-      console.log("Customer Sign Up Data:", form);
+      const result = await dispatch(
+        registerUser({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone,
+          role: form.role,
+          street: form.street,
+          city: form.city,
+          state: form.state,
+          country: form.country,
+          zip: form.zip,
+        })
+      );
+
+      if (result.payload?.message) {
+        navigate("/login");
+      }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50 px-3 sm:px-4 py-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 px-2 sm:px-4 py-2">
       <div className="w-full max-w-6xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT SIDE */}
-        <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-amber-400 via-yellow-400 to-orange-400 p-6 sm:p-10 items-center justify-center relative">
+        <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-blue-500 via-cyan-500 to-sky-400 p-6 sm:p-8 items-center justify-center relative">
           <div className="text-center">
-            <div className="w-48 sm:w-60 h-48 sm:h-60 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <i className="pi pi-user text-5xl sm:text-6xl text-white"></i>
+            <div className="w-40 sm:w-56 h-40 sm:h-56 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-5">
+              <img src="/logo.png" alt="Logo" className="w-36 sm:w-52 h-36 sm:h-52 object-contain" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white drop-shadow-lg">
-              Join As Customer
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-white drop-shadow-lg">
+              Join Now
             </h2>
-            <p className="text-sm sm:text-base opacity-95 text-white drop-shadow">
+            <p className="text-xs sm:text-sm opacity-95 text-white drop-shadow">
               Book services from trusted professionals in your area
             </p>
           </div>
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="w-full md:w-1/2 bg-white rounded-2xl md:rounded-none md:rounded-r-3xl p-6 sm:p-10">
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-              Create Customer Account
+        <div className="w-full md:w-1/2 bg-white rounded-2xl md:rounded-none md:rounded-r-3xl p-4 sm:p-6">
+          <div className="mb-2 sm:mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              Create Account
             </h2>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 mt-1">
               Step {activeStep + 1} of {steps.length}
             </p>
           </div>
 
-          {/* Steps Component */}
-          <div className="mb-8 px-2">
-            <div className="relative flex justify-between items-start">
-              {/* Connector Lines */}
-              <div className="absolute top-6 left-0 right-0 h-1 bg-gray-300 z-0"></div>{" "}
-              {steps.map((step, index) => (
-                <div
-                  key={index}
-                  className={`relative flex flex-col items-center flex-1 ${
-                    index < steps.length - 1 ? "" : ""
-                  }`}
-                >
-                  {/* Active Line */}
-                  {index < activeStep && (
-                    <div
-                      className="absolute top-6 left-0 h-1 bg-green-500 transition-all duration-300"
-                      style={{
-                        width:
-                          index === 0
-                            ? "calc(100% - 24px)"
-                            : "calc(100% - 12px)",
-                        marginLeft: index === 0 ? "24px" : "6px",
-                      }}
-                    ></div>
-                  )}
-                  {index === activeStep && (
-                    <div
-                      className="absolute top-6 left-0 h-1 bg-amber-500 transition-all duration-300"
-                      style={{
-                        width: "50%",
-                        marginLeft: "24px",
-                      }}
-                    ></div>
-                  )}
-
-                  {/* Step Circle */}
-                  <div
-                    className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg transition-all duration-300 ${
-                      index <= activeStep
-                        ? index === activeStep
-                          ? "bg-amber-500 text-white scale-110 shadow-lg"
-                          : "bg-green-500 text-white"
-                        : "bg-gray-300 text-gray-600"
-                    }`}
-                  >
-                    {index < activeStep ? (
-                      <i className="pi pi-check text-lg text-black font-bold"></i>
-                    ) : index === activeStep ? (
-                      <i className={`pi ${step.icon} text-lg`}></i>
-                    ) : (
-                      <span className="text-base">{index + 1}</span>
-                    )}
-                  </div>
-
-                  {/* Step Label */}
-                  <div className="mt-3 text-center">
-                    <p
-                      className={`text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
-                        index <= activeStep
-                          ? index === activeStep
-                            ? "text-amber-600"
-                            : "text-green-600"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {step.label}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <i className="pi pi-exclamation-circle text-red-600 text-sm mt-0.5"></i>
+              <p className="text-red-700 text-xs">
+                {typeof error === "string" ? error : error?.message}
+              </p>
             </div>
+          )}
+
+          {/* Steps Component */}
+          <div className="mb-3 sm:mb-4">
+            <Steps model={steps} activeIndex={activeStep} />
           </div>
 
           {/* Form Content */}
-          <div className="min-h-[300px]">
+          <div>
             {activeStep === 0 ? (
               // Step 1: Personal Information
-              <div className="space-y-4 sm:space-y-5">
+              <div className="space-y-2 sm:space-y-3">
                 {/* Full Name Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Full Name
                   </label>
                   <InputText
-                    name="fullName"
-                    value={form.fullName}
+                    name="name"
+                    value={form.name}
                     onChange={handleChange}
                     placeholder="Enter your full name"
-                    className="w-full "
-                    invalid={!!errors.fullName}
+                    className="w-full text-sm"
+                    invalid={!!errors.name}
                   />
-                  {errors.fullName && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                  {errors.name && (
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
-                      {errors.fullName}
+                      {errors.name}
                     </p>
                   )}
                 </div>
 
                 {/* Email Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Email Address
                   </label>
                   <InputText
@@ -245,11 +224,11 @@ const SignUpCustomer = () => {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    className="w-full"
+                    className="w-full text-sm"
                     invalid={!!errors.email}
                   />
                   {errors.email && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.email}
                     </p>
@@ -258,7 +237,7 @@ const SignUpCustomer = () => {
 
                 {/* Phone Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Phone Number
                   </label>
                   <InputMask
@@ -267,11 +246,11 @@ const SignUpCustomer = () => {
                     onChange={handleChange}
                     mask="99999 99999"
                     placeholder="98765 43210"
-                    className="w-full"
+                    className="w-full text-sm"
                     invalid={!!errors.phone}
                   />
                   {errors.phone && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.phone}
                     </p>
@@ -280,7 +259,7 @@ const SignUpCustomer = () => {
 
                 {/* Password Field */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
                     Password
                   </label>
 
@@ -289,19 +268,18 @@ const SignUpCustomer = () => {
                     value={form.password}
                     onChange={handleChange}
                     placeholder="Enter password"
-                    // toggleMask
                     feedback={false}
-                    inputClassName="w-full px-4 py-3 rounded-lg"
+                    inputClassName="w-full px-3 py-2 rounded-lg text-sm"
                     invalid={!!errors.password}
                     inputStyle={{
-                      height: "48px",
+                      height: "38px",
                       width: "100%",
                       paddingRight: "19rem",
                     }}
                   />
 
                   {errors.password && (
-                    <p className="!text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.password}
                     </p>
@@ -319,41 +297,55 @@ const SignUpCustomer = () => {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex gap-4 mt-8 justify-between">
-            <button
-              onClick={handlePrev}
-              disabled={activeStep === 0}
-              className="flex items-center justify-center px-8 py-3 border-2 border-amber-500 text-amber-600 font-bold rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-amber-50 active:scale-95 min-w-[140px]"
-            >
-              <i className="pi pi-arrow-left mr-2"></i>
-              Previous
-            </button>
+          <div className="flex gap-2 mt-3 sm:mt-4 justify-between">
+            {activeStep === 0 ? (
+              <div></div>
+            ) : (
+              <button
+                onClick={handlePrev}
+                disabled={activeStep === 0}
+                className="flex items-center justify-center px-4 sm:px-6 py-2 border-2 border-blue-500 text-blue-600 font-semibold text-sm rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-50 active:scale-95"
+              >
+                <i className="pi pi-arrow-left mr-1"></i>
+                Prev
+              </button>
+            )}
 
             {activeStep === steps.length - 1 ? (
               <button
                 onClick={handleSignUp}
-                className="flex items-center justify-center px-8 py-3 bg-linear-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 min-w-[140px]"
+                disabled={loading}
+                className="flex items-center justify-center px-4 sm:px-6 py-2 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold text-sm rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <i className="pi pi-check mr-2"></i>
-                Create Account
+                {loading ? (
+                  <>
+                    <i className="pi pi-spinner pi-spin mr-1"></i>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <i className="pi pi-check mr-1"></i>
+                    Submit
+                  </>
+                )}
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="flex items-center justify-center px-8 py-3 bg-linear-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95 min-w-[140px]"
+                className="flex items-center justify-center px-4 sm:px-6 py-2 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold text-sm rounded-lg transition-all duration-200 transform hover:shadow-lg active:scale-95"
               >
                 Next
-                <i className="pi pi-arrow-right ml-2"></i>
+                <i className="pi pi-arrow-right ml-1"></i>
               </button>
             )}
           </div>
 
           {/* Login Link */}
-          <div className="text-center text-sm text-gray-600 mt-6">
+          <div className="text-center text-xs sm:text-sm text-gray-600 mt-2 sm:mt-3">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent hover:underline transition"
+              className="font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent hover:underline transition"
             >
               Login here
             </Link>
