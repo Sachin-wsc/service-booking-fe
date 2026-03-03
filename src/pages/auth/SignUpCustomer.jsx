@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { InputMask } from "primereact/inputmask";
 import { Steps } from "primereact/steps";
+import { Toast } from "primereact/toast";
 import Address from "../../components/Address";
 import { registerUser, clearError } from "../../features/authSlice";
 
 const SignUpCustomer = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const toastRef = useRef(null);
   const { loading, error } = useSelector((state) => state.auth);
   const [activeStep, setActiveStep] = useState(0);
 
@@ -43,6 +45,21 @@ const SignUpCustomer = () => {
     { label: "Personal Information", icon: "pi pi-user" },
     { label: "Address", icon: "pi pi-map-marker" },
   ];
+
+  // Show toast for errors
+  useEffect(() => {
+    if (error) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Registration Failed",
+        detail:
+          typeof error === "string"
+            ? error
+            : error?.message || "An error occurred during registration",
+        life: 4000,
+      });
+    }
+  }, [error]);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -136,23 +153,34 @@ const SignUpCustomer = () => {
           state: form.state,
           country: form.country,
           zip: form.zip,
-        })
+        }),
       );
 
       if (result.payload?.message) {
-        navigate("/login");
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Account Created Successfully",
+          detail: "Your account has been created! Redirecting to login...",
+          life: 3000,
+        });
+        setTimeout(() => navigate("/login"), 3000);
       }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 px-2 sm:px-4 py-2">
+      <Toast ref={toastRef} />
       <div className="w-full max-w-6xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT SIDE */}
         <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-blue-500 via-cyan-500 to-sky-400 p-6 sm:p-8 items-center justify-center relative">
           <div className="text-center">
             <div className="w-40 sm:w-56 h-40 sm:h-56 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-5">
-              <img src="/logo.png" alt="Logo" className="w-36 sm:w-52 h-36 sm:h-52 object-contain" />
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-36 sm:w-52 h-36 sm:h-52 object-contain"
+              />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-white drop-shadow-lg">
               Join Now
@@ -173,15 +201,6 @@ const SignUpCustomer = () => {
               Step {activeStep + 1} of {steps.length}
             </p>
           </div>
-
-          {error && (
-            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <i className="pi pi-exclamation-circle text-red-600 text-sm mt-0.5"></i>
-              <p className="text-red-700 text-xs">
-                {typeof error === "string" ? error : error?.message}
-              </p>
-            </div>
-          )}
 
           {/* Steps Component */}
           <div className="mb-3 sm:mb-4">

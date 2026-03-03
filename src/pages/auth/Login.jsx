@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { Toast } from "primereact/toast";
 import { loginUser, clearError } from "../../features/authSlice";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const toastRef = useRef(null);
   const { loading, error } = useSelector((state) => state.auth);
 
   const [form, setForm] = useState({
@@ -20,6 +22,21 @@ const Login = () => {
     email: "",
     password: "",
   });
+
+  // Show toast for errors
+  useEffect(() => {
+    if (error) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Login Failed",
+        detail:
+          typeof error === "string"
+            ? error
+            : error?.message || "An error occurred during login",
+        life: 4000,
+      });
+    }
+  }, [error]);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,15 +81,26 @@ const Login = () => {
         loginUser({
           email: form.email,
           password: form.password,
-        })
+        }),
       );
 
       if (result.payload?.user) {
         const userRole = result.payload.user.role;
-        
+
+        // Show success toast
+
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Login Successful",
+          detail: `Welcome back, ${result.payload.user.name || "User"}!`,
+          life: 3000,
+        });
+
         // Check if provider was recently registered and is pending approval
         if (userRole === "provider") {
-          const recentlyRegisteredProvider = localStorage.getItem("providerPendingApproval");
+          const recentlyRegisteredProvider = localStorage.getItem(
+            "providerPendingApproval",
+          );
           if (recentlyRegisteredProvider === form.email) {
             // Clear the flag
             localStorage.removeItem("providerPendingApproval");
@@ -81,7 +109,7 @@ const Login = () => {
             return;
           }
         }
-        
+        setTimeout(() => {
         if (userRole === "admin") {
           navigate("/admin/dashboard");
         } else if (userRole === "customer") {
@@ -89,12 +117,14 @@ const Login = () => {
         } else if (userRole === "provider") {
           navigate("/provider/dashboard");
         }
+        }, 1000);
       }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 px-3 sm:px-4 py-4">
+      <Toast ref={toastRef} />
       <div className="w-full max-w-6xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT SIDE */}
         <div className="hidden md:flex md:w-1/2 bg-linear-to-br from-blue-500 via-cyan-500 to-sky-400 p-6 sm:p-10 items-center justify-center relative">
@@ -125,15 +155,6 @@ const Login = () => {
               Enter your credentials to continue
             </p>
           </div>
-
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <i className="pi pi-exclamation-circle text-red-600 mt-1"></i>
-              <p className="text-red-700 text-sm">
-                {typeof error === "string" ? error : error?.message}
-              </p>
-            </div>
-          )}
 
           <form className="space-y-5 sm:space-y-6" onSubmit={handleLogin}>
             {/* Email Field */}

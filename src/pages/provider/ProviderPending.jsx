@@ -42,32 +42,32 @@ const ProviderPending = () => {
             {/* Info Section */}
             <div className="space-y-4 mb-8">
               {/* Timeline Card */}
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
+              <div className="bg-linear-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
                 <h2 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
                   📋 What Happens Next
                 </h2>
                 <div className="space-y-3 text-left">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-1">
-                      <span className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-bold">1</span>
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 mt-1 w-1  ">
+                      <span className="flex items-center justify-center h-8 rounded-full bg-blue-500! text-white text-sm font-bold">1</span>
                     </div>
                     <div className="text-left">
                       <p className="font-semibold text-gray-800">Admin Reviews Your Profile</p>
                       <p className="text-sm text-gray-600">We'll verify your business details and documents</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-1">
-                      <span className="flex items-center justify-center h-8 w-8 rounded-full bg-amber-500 text-white text-sm font-bold">2</span>
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 mt-1 w-1">
+                      <span className="flex items-center justify-center h-8  rounded-full bg-amber-500 text-white text-sm font-bold">2</span>
                     </div>
                     <div className="text-left">
                       <p className="font-semibold text-gray-800">Approval or Additional Info</p>
                       <p className="text-sm text-gray-600">Usually takes 24-48 hours</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-1">
-                      <span className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500 text-white text-sm font-bold">3</span>
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 mt-1 w-1">
+                      <span className="flex items-center justify-center h-8 rounded-full bg-green-500! text-white text-sm font-bold">3</span>
                     </div>
                     <div className="text-left">
                       <p className="font-semibold text-gray-800">Start Offering Services</p>
@@ -78,12 +78,12 @@ const ProviderPending = () => {
               </div>
 
               {/* Info Box */}
-              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200!">
                 <div className="flex gap-3">
-                  <i className="pi pi-info-circle text-yellow-600 text-xl flex-shrink-0 mt-1"></i>
+                  <i className="pi pi-info-circle text-yellow-600! text-xl shrink-0 mt-1"></i>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-800 mb-1">Check Your Email</p>
-                    <p className="text-xs text-gray-600">We may need additional information. Please check your email for any requests from our admin team.</p>
+                    <p className="text-sm font-semibold text-gray-800! mb-1">Check Your Email</p>
+                    <p className="text-xs text-gray-600!">We may need additional information. Please check your email for any requests from our admin team.</p>
                   </div>
                 </div>
               </div>

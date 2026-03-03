@@ -1,15 +1,13 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Button } from "primereact/button";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+import { Link } from "react-router-dom";
 
 const CustomerDashboard = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
 
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
@@ -30,7 +28,7 @@ const CustomerDashboard = () => {
                   <p className="text-gray-600 text-sm font-semibold">Active Bookings</p>
                   <p className="text-3xl font-bold text-blue-600 mt-2">0</p>
                 </div>
-                <i className="pi pi-calendar text-4xl text-blue-400 opacity-50"></i>
+                <i className="pi pi-calendar text-4xl text-blue-400 opacity-50 mb-5 ml-3"></i>
               </div>
             </div>
 
@@ -41,7 +39,7 @@ const CustomerDashboard = () => {
                   <p className="text-gray-600 text-sm font-semibold">Completed Services</p>
                   <p className="text-3xl font-bold text-cyan-600 mt-2">0</p>
                 </div>
-                <i className="pi pi-check-circle text-4xl text-cyan-400 opacity-50"></i>
+                <i className="pi pi-check-circle text-4xl text-cyan-400 opacity-50 mb-5 ml-3"></i>
               </div>
             </div>
 
@@ -50,9 +48,9 @@ const CustomerDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-semibold">Total Spent</p>
-                  <p className="text-3xl font-bold text-green-600 mt-2">$0</p>
+                  <p className="text-3xl font-bold text-green-600 mt-2">₹0</p>
                 </div>
-                <i className="pi pi-wallet text-4xl text-green-400 opacity-50"></i>
+                <i className="pi pi-wallet text-4xl text-green-400 opacity-50 mb-5 ml-3"></i>
               </div>
             </div>
           </div>
@@ -62,19 +60,19 @@ const CustomerDashboard = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Browse Services</h2>
               <p className="text-gray-600 mb-4">Explore available services in your area</p>
-              <Button label="Browse Now" className="w-full bg-blue-500" />
+              {/* <Button label="Browse Now" className="w-full bg-blue-500!" /> */}
+              <Link to="/customer/all-services" className="text-blue-500! hover:underline">Browse All Services</Link>
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">My Bookings</h2>
               <p className="text-gray-600 mb-4">View and manage your bookings</p>
-              <Button label="View Bookings" className="w-full bg-cyan-500" />
+              <Button label="View Bookings" className="w-full bg-cyan-500!" />
             </div>
           </div>
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 };
