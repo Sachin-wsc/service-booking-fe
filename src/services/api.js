@@ -27,20 +27,37 @@ export const authAPI = {
 };
 
 export const providerAPI = {
+  // Service Management
   createService: (serviceData) => api.post("/provider/service", serviceData),
   getServices: () => api.get("/provider/services"),
+  getService: (id) => api.get(`/provider/service/${id}`),
+  updateService: (id, serviceData) => api.put(`/provider/service/${id}`, serviceData),
+  deleteService: (id) => api.delete(`/provider/service/${id}`),
+  
+  // Availability Management
+  addAvailability: (availabilityData) => api.post("/provider/availability", availabilityData),
+  getAvailability: (serviceId) => api.get(`/provider/service/${serviceId}/availability`),
+  updateAvailability: (id, availabilityData) => api.put(`/provider/availability/${id}`, availabilityData),
+  deleteAvailability: (id) => api.delete(`/provider/availability/${id}`),
+  
+  // Booking Management
   updateBookingStatus: (bookingData) => api.patch("/provider/booking-status", bookingData),
 };
 
 export const adminAPI = {
   getAllUsers: () => api.get("/admin/users"),
-  approveProvider: (providerId, userId) => api.post("/admin/approve-provider", { provider_id: providerId, user_id: userId }),
+  getPendingProviders: () => api.get("/admin/providers"),
+  approveProvider: (providerId) => api.post("/admin/approve-provider", { provider_id: providerId }),
   blockUser: (id) => api.patch("/admin/block-user", { id }),
 };
 
 export const categoryAPI = {
-  getAll: () => api.get("/admin/categories"),
-  getById: (id) => api.get(`/admin/category/${id}`),
+  // Public endpoints - accessible to everyone
+  getAll: () => api.get("/services/categories"),
+  getCategories: () => api.get("/services/categories"),
+  getById: (id) => api.get(`/services/category/${id}`),
+  
+  // Admin-only endpoints
   create: (categoryData) => api.post("/admin/category", categoryData),
   update: (id, categoryData) => api.put(`/admin/category/${id}`, categoryData),
   delete: (id) => api.delete(`/admin/category/${id}`),

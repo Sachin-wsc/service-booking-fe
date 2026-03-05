@@ -21,6 +21,7 @@ import CustomerBookingPage from "./pages/customer/CustomerBookingPage";
 import ServiceDetail from "./pages/customer/ServiceDetail";
 
 import AddService from "./pages/provider/AddService";
+import ServicesList from "./pages/provider/ServicesList";
 import Availability from "./pages/provider/Availability";
 
 import Navbar from "./components/Navbar";
@@ -114,6 +115,15 @@ function App() {
           element={
             <ProtectedRoute
               component={AddService}
+              allowedRoles={["provider"]}
+            />
+          }
+        />
+        <Route
+          path="/provider/services"
+          element={
+            <ProtectedRoute
+              component={ServicesList}
               allowedRoles={["provider"]}
             />
           }

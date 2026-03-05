@@ -61,12 +61,12 @@ function AllUsers() {
         </p>
       </div>
 
-      {errors && (
+      {/* {errors && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 mt-4">
           <i className="pi pi-exclamation-circle text-red-600"></i>
           <p className="text-red-700">{errors}</p>
         </div>
-      )}
+      )} */}
 
       {loading ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center mt-6">

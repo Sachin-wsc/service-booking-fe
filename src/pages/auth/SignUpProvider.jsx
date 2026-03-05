@@ -87,8 +87,8 @@ const SignUpProvider = () => {
     }
   };
 
-  const handleCheckboxChange = (e) => {
-    setForm({ ...form, agreeTerms: e.target.checked });
+  const handleCheckboxChange = (checked) => {
+    setForm({ ...form, agreeTerms: checked });
     if (errors.agreeTerms) {
       setErrors({ ...errors, agreeTerms: "" });
     }
@@ -358,12 +358,13 @@ const SignUpProvider = () => {
                   <div className="flex items-start gap-2">
                     <Checkbox
                       id="agreeTerms"
-                      invalid={!checked}
+                      invalid={!form.agreeTerms}
                       onChange={(e) => {
-                        setChecked(e.checked);
-                        handleCheckboxChange(e);
+                        const isChecked = e.checked;
+                        setChecked(isChecked);
+                        handleCheckboxChange(isChecked);
                       }}
-                      checked={checked && form.agreeTerms}
+                      checked={form.agreeTerms}
                       className=" text-blue-500 rounded cursor-pointer"
                     ></Checkbox>
 

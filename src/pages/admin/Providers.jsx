@@ -19,15 +19,12 @@ function Providers() {
   const fetchProviders = async () => {
     try {
       setLoading(true);
-      const response = await adminAPI.getAllUsers();
-      const allUsers = response.data || [];
+      const response = await adminAPI.getPendingProviders();
+      const allProviders = response.data || [];
 
-      // Filter pending providers from users list
-      const pendingProviders = allUsers.filter(
-        (user) =>
-          user.role &&
-          user.role.toLowerCase() === "provider" &&
-          user.status === "pending",
+      // Filter for pending providers only
+      const pendingProviders = allProviders.filter(
+        (provider) => provider.status === "pending"
       );
       setProviders(pendingProviders);
       setErrors(null);
@@ -108,12 +105,12 @@ function Providers() {
         </p>
       </div>
 
-      {errors && (
+      {/* {errors && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 mt-4">
           <i className="pi pi-exclamation-circle text-red-600"></i>
           <p className="text-red-700">{errors}</p>
         </div>
-      )}
+      )} */}
 
       {loading ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center mt-6">
@@ -128,10 +125,10 @@ function Providers() {
             rows={10}
             className="p-datatable-striped"
           >
-            <Column field="name" header="Name" sortable />
-            <Column field="email" header="Email" sortable />
-            <Column field="phone" header="Phone" />
-            <Column field="role" header="Role" sortable />
+            <Column field="user_name" header="Name" sortable />
+            <Column field="user_email" header="Email" sortable />
+            <Column field="user_phone" header="Phone" />
+            <Column field="Buisness_name" header="Business Name" sortable />
             <Column
               field="status"
               header="Status"
@@ -154,7 +151,7 @@ function Providers() {
                     icon="pi pi-times"
                     size="small"
                     severity="danger"
-                    onClick={() => handleRejectProvider(rowData.id)}
+                    onClick={() => handleRejectProvider(rowData.user_id)}
                   />
                 </div>
               )}
