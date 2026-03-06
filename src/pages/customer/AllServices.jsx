@@ -1,115 +1,73 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { DataView } from "primereact/dataview";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import { Rating } from "primereact/rating";
 import { Tag } from "primereact/tag";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Badge } from "primereact/badge";
 import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
+import { customerAPI, categoryAPI } from "../../services/api";
+import { Toast } from "primereact/toast";
+import { useRef } from "react";
 
 function AllServices() {
+  const [services, setServices] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
-  const [selectedRating, setSelectedRating] = useState(null);
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const toastRef = useRef(null);
 
   const navigate = useNavigate();
 
-  // Dummy Data
-  const services = [
-    {
-      id: 1,
-      name: "Home Cleaning",
-      category: "Cleaning",
-      price: 999,
-      rating: 4,
-      image: "https://picsum.photos/id/66/200/300",
-      description: "Professional deep cleaning for your home.",
-    },
-    {
-      id: 2,
-      name: "AC Repair",
-      category: "Repair",
-      price: 499,
-      rating: 5,
-      image: "https://picsum.photos/id/27/200/300",
-      description: "Fast and reliable AC repair service.",
-    },
-    {
-      id: 3,
-      name: "Salon at Home",
-      category: "Beauty",
-      price: 1299,
-      rating: 4,
-      image: "https://picsum.photos/id/12/200/300",
-      description: "Premium salon services at your doorstep.",
-    },
-    {
-      id: 4,
-      name: "Plumbing Service",
-      category: "Repair",
-      price: 699,
-      rating: 3,
-      image: "https://picsum.photos/id/13/200/300",
-      description: "Expert plumbing solutions.",
-    },
-    {
-      id: 5,
-      name: "Electrician Service",
-      category: "Repair",
-      price: 599,
-      rating: 4,
-      image: "https://picsum.photos/id/27/200/300",
-      description: "Certified electrician at your service.",
-    },
-    {
-      id: 6,
-      name: "Car Wash",
-      category: "Cleaning",
-      price: 399,
-      rating: 5,
-      image: "https://picsum.photos/id/28/200/300",
-      description: "Complete car wash and detailing.",
-    },
-    {
-      id: 7,
-      name: "Massage Therapy",
-      category: "Beauty",
-      price: 1499,
-      rating: 5,
-      image: "https://picsum.photos/id/29/200/300",
-      description: "Relaxing professional massage therapy.",
-    },
-    {
-      id: 8,
-      name: "Painting Service",
-      category: "Cleaning",
-      price: 1799,
-      rating: 4,
-      image: "https://picsum.photos/id/30/200/300",
-      description: "Interior and exterior painting.",
-    },
-    {
-      id: 9,
-      name: "Gardening Service",
-      category: "Cleaning",
-      price: 899,
-      rating: 4,
-      image: "https://picsum.photos/id/69/200/300",
-      description: "Professional gardening and landscaping.",
-    },
-  ];
+  // Fetch services on mount
+  useEffect(() => {
+    fetchServices();
+    fetchCategories();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const response = await customerAPI.getAllServices();
+      setServices(response.data || []);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to load services",
+      });
+      setServices([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await categoryAPI.getCategories();
+      const categoryList = response.data || [];
+      // Create options from category data
+      const options = categoryList.map((cat) => ({
+        label: cat.name,
+        value: cat.name,
+      }));
+      setCategories(options);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const categoryOptions = [
     { label: "All Categories", value: null },
-    { label: "Cleaning", value: "Cleaning" },
-    { label: "Repair", value: "Repair" },
-    { label: "Beauty", value: "Beauty" },
+    ...categories,
   ];
 
   const sortOptions = [
@@ -117,9 +75,9 @@ function AllServices() {
     { label: "Price: High to Low", value: "high" },
   ];
 
-  const ratingOptions = [
-    { label: "4★ & above", value: 4 },
-    { label: "3★ & above", value: 3 },
+  const availabilityOptions = [
+    { label: "All Services", value: false },
+    { label: "Available Only", value: true },
   ];
 
   // Filtering + Sorting
@@ -128,16 +86,19 @@ function AllServices() {
 
     if (search) {
       const cleanedSearch = search.toLowerCase().trim();
-
-      data = data.filter((s) => s.name.toLowerCase().includes(cleanedSearch));
+      data = data.filter(
+        (s) =>
+          s.title.toLowerCase().includes(cleanedSearch) ||
+          s.provider_name.toLowerCase().includes(cleanedSearch),
+      );
     }
 
     if (selectedCategory) {
-      data = data.filter((s) => s.category === selectedCategory);
+      data = data.filter((s) => s.category_name === selectedCategory);
     }
 
-    if (selectedRating) {
-      data = data.filter((s) => s.rating >= selectedRating);
+    if (showAvailableOnly) {
+      data = data.filter((s) => s.available_slots > 0);
     }
 
     if (sortOrder === "low") {
@@ -147,27 +108,41 @@ function AllServices() {
     }
 
     return data;
-  }, [search, selectedCategory, selectedRating, sortOrder]);
+  }, [search, selectedCategory, sortOrder, showAvailableOnly, services]);
 
   const getActiveFilterCount = () => {
     let count = 0;
     if (search) count++;
     if (selectedCategory) count++;
-    if (selectedRating) count++;
     if (sortOrder) count++;
+    if (showAvailableOnly) count++;
     return count;
   };
 
   const resetFilters = () => {
     setSearch("");
     setSelectedCategory(null);
-    setSelectedRating(null);
     setSortOrder(null);
+    setShowAvailableOnly(false);
   };
 
   const openDialog = (service) => {
     setSelectedService(service);
     setVisible(true);
+  };
+
+  const getAvailabilityBadge = (service) => {
+    if (service.available_slots > 0) {
+      return (
+        <Tag
+          value={`${service.available_slots} Slot${service.available_slots > 1 ? "s" : ""} Available`}
+          severity="success"
+          className="bg-green-600"
+        />
+      );
+    } else {
+      return <Tag value="Already Booked" severity="danger" />;
+    }
   };
 
   const itemTemplate = (service) => (
@@ -176,35 +151,44 @@ function AllServices() {
         className="h-full shadow-2 border-round-2xl hover:shadow-6 transition-duration-200 cursor-pointer"
         onClick={() => openDialog(service)}
       >
-        {/* IMAGE */}
-        <img
-          src={service.image}
-          alt={service.name}
-          className="w-full h-8rem sm:h-12rem object-cover border-round-top-2xl"
-        />
+        {/* PLACEHOLDER IMAGE */}
+        <div className="w-full h-8rem sm:h-12rem bg-gray-200 border-round-top-2xl flex items-center justify-center text-gray-400">
+          <i className="pi pi-image text-4xl" />
+        </div>
 
         {/* CONTENT */}
         <div className="flex flex-column grow p-2 sm:p-3">
           {/* Title + Category */}
           <div className="flex flex-col sm:flex-row justify-content-between align-items-start sm:align-items-center gap-2 mb-2">
             <h3 className="text-base sm:text-lg font-semibold m-0 line-clamp-2">
-              {service.name}
+              {service.title}
             </h3>
             <Tag
-              value={service.category}
+              value={service.category_name}
               severity="info"
               className="whitespace-nowrap"
             />
           </div>
 
-          {/* Rating */}
-          <Rating value={service.rating} readOnly cancel={false} />
+          {/* Provider Name */}
+          <p className="text-sm text-gray-600 m-0 mb-2">
+            <i className="pi pi-user mr-2" />
+            {service.provider_name}
+          </p>
+
+          {/* Description */}
+          <p className="text-sm text-gray-600 m-0 mb-2 line-clamp-2">
+            {service.description}
+          </p>
 
           {/* Spacer pushes price to bottom */}
           <div className="grow" />
 
+          {/* Availability Status */}
+          <div className="mb-2">{getAvailabilityBadge(service)}</div>
+
           {/* Price + Button */}
-          <div className="flex flex-col sm:flex-row justify-content-between align-items-start sm:align-items-center gap-2 mt-3">
+          <div className="flex flex-col sm:flex-row justify-content-between align-items-start sm:align-items-center gap-2">
             <span className="text-lg sm:text-xl font-bold text-orange-500!">
               ₹{service.price}
             </span>
@@ -213,7 +197,10 @@ function AllServices() {
               label="View"
               icon="pi pi-eye"
               className="p-button-sm p-button-warning w-full sm:w-auto"
-              onClick={() => navigate(`/customer/details/${service.id}`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/customer/details/${service.id}`);
+              }}
             />
           </div>
         </div>
@@ -222,8 +209,9 @@ function AllServices() {
   );
   return (
     <div className="p-3 sm:p-4 md:p-6 bg-gray-50 min-h-screen">
+      <Toast ref={toastRef} />
       <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
-        All Services
+        All Services {loading && <i className="pi pi-spin pi-spinner" />}
       </h2>
 
       {/* FILTER BAR */}
@@ -245,10 +233,10 @@ function AllServices() {
         />
 
         <Dropdown
-          value={selectedRating}
-          options={ratingOptions}
-          onChange={(e) => setSelectedRating(e.value)}
-          placeholder="Rating"
+          value={showAvailableOnly}
+          options={availabilityOptions}
+          onChange={(e) => setShowAvailableOnly(e.value)}
+          placeholder="Availability"
           className="rounded-xl w-full sm:w-auto"
         />
 
@@ -292,17 +280,33 @@ function AllServices() {
       </div>
 
       {/* SERVICES GRID WITH PAGINATION */}
-      <DataView
-        value={filteredServices}
-        itemTemplate={itemTemplate}
-        paginator
-        rows={8}
-        layout="grid"
-      />
+      {loading ? (
+        <div className="flex justify-center align-items-center min-h-96">
+          <div className="text-center">
+            <i className="pi pi-spin pi-spinner text-4xl" />
+            <p className="mt-3 text-gray-600">Loading services...</p>
+          </div>
+        </div>
+      ) : filteredServices.length === 0 ? (
+        <div className="flex justify-center align-items-center min-h-96">
+          <div className="text-center">
+            <i className="pi pi-inbox text-4xl text-gray-400" />
+            <p className="mt-3 text-gray-600">No services found</p>
+          </div>
+        </div>
+      ) : (
+        <DataView
+          value={filteredServices}
+          itemTemplate={itemTemplate}
+          paginator
+          rows={8}
+          layout="grid"
+        />
+      )}
 
       {/* DETAILS DIALOG */}
       <Dialog
-        header={selectedService?.name}
+        header={selectedService?.title}
         visible={visible}
         style={{ width: "90vw", maxWidth: "450px" }}
         onHide={() => setVisible(false)}
@@ -310,19 +314,38 @@ function AllServices() {
       >
         {selectedService && (
           <div>
-            <img
-              src={selectedService.image}
-              alt={selectedService.name}
-              className="w-full h-40 sm:h-52 object-cover rounded-lg mb-4"
-            />
+            <div className="w-full h-40 sm:h-52 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">
+              <i className="pi pi-image text-4xl" />
+            </div>
 
-            <Tag value={selectedService.category} className="mb-3" />
+            <div className="mb-3 flex gap-2">
+              <Tag value={selectedService.category_name} className="mb-1" />
+              {selectedService.available_slots > 0 ? (
+                <Tag
+                  value="Available"
+                  severity="success"
+                  className="bg-green-600"
+                />
+              ) : (
+                <Tag value="Booked" severity="danger" />
+              )}
+            </div>
 
-            <p className="text-sm sm:text-base text-gray-600 mb-3">
+            <p className="text-sm text-gray-600 mb-2">
+              <strong>Provider:</strong> {selectedService.provider_name}
+            </p>
+
+            <p className="text-sm sm:text-base text-gray-700 mb-3">
               {selectedService.description}
             </p>
 
-            <Rating value={selectedService.rating} readOnly cancel={false} />
+            {selectedService.available_slots > 0 && (
+              <p className="text-sm text-green-600 mb-3">
+                <i className="pi pi-check-circle mr-2" />
+                {selectedService.available_slots} slot
+                {selectedService.available_slots > 1 ? "s" : ""} available
+              </p>
+            )}
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-4">
               <span className="text-xl sm:text-2xl font-bold text-orange-500">
@@ -330,10 +353,19 @@ function AllServices() {
               </span>
 
               <Button
-                label="Book Now"
+                label={
+                  selectedService.available_slots > 0
+                    ? "Book Now"
+                    : "Unavailable"
+                }
                 icon="pi pi-calendar-plus"
                 className="p-button-warning w-full sm:w-auto"
-                onClick={() => navigate(`/customer/book/${selectedService.id}`)}
+                onClick={() => {
+                  if (selectedService.available_slots > 0) {
+                    navigate(`/customer/book/${selectedService.id}`);
+                  }
+                }}
+                disabled={selectedService.available_slots === 0}
               />
             </div>
           </div>

@@ -94,10 +94,7 @@ function ServicesList() {
       errors.category_id = "Category is required";
     }
 
-    if (
-      editFormData.price === null ||
-      editFormData.price === undefined
-    ) {
+    if (editFormData.price === null || editFormData.price === undefined) {
       errors.price = "Price is required";
     } else if (editFormData.price <= 0) {
       errors.price = "Price must be greater than 0";
@@ -196,14 +193,14 @@ function ServicesList() {
           className="p-button-rounded p-button-warning"
           onClick={() => handleEditClick(rowData)}
           tooltip="Edit Service"
-          tooltipPosition="top"
+          tooltipOptions={{ position: "top" }}
         />
         <Button
           icon="pi pi-trash"
           className="p-button-rounded p-button-danger"
           onClick={() => handleDeleteClick(rowData)}
           tooltip="Delete Service"
-          tooltipPosition="top"
+          tooltipOptions={{ position: "top" }}
         />
       </div>
     );
@@ -226,9 +223,7 @@ function ServicesList() {
               <h2 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
                 My Services
               </h2>
-              <p className="text-gray-600">
-                Manage and view all your services
-              </p>
+              <p className="text-gray-600">Manage and view all your services</p>
             </div>
             <Button
               label="Add Service"
@@ -275,7 +270,12 @@ function ServicesList() {
                 body={categoryTemplate}
                 sortable
               />
-              <Column field="price" header="Price" body={priceTemplate} sortable />
+              <Column
+                field="price"
+                header="Price"
+                body={priceTemplate}
+                sortable
+              />
               <Column
                 field="description"
                 header="Description"
@@ -329,6 +329,7 @@ function ServicesList() {
             <Dropdown
               value={editFormData.category_id}
               options={categories}
+              disabled
               onChange={(e) => {
                 setEditFormData({ ...editFormData, category_id: e.value });
                 if (editErrors.category_id) {
@@ -339,14 +340,16 @@ function ServicesList() {
               className={`w-full ${editErrors.category_id ? "ng-invalid" : ""}`}
             />
             {editErrors.category_id && (
-              <p className="text-red-500 text-sm mt-1">{editErrors.category_id}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {editErrors.category_id}
+              </p>
             )}
           </div>
 
           {/* Price */}
           <div>
             <label className="block font-semibold text-gray-700 mb-2">
-              Price (₹) <span className="text-red-500">*</span>
+              Price (₹) <span className="text-red-500!">*</span>
             </label>
             <InputNumber
               value={editFormData.price}
@@ -376,7 +379,10 @@ function ServicesList() {
             <InputTextarea
               value={editFormData.description}
               onChange={(e) => {
-                setEditFormData({ ...editFormData, description: e.target.value });
+                setEditFormData({
+                  ...editFormData,
+                  description: e.target.value,
+                });
                 if (editErrors.description) {
                   setEditErrors({ ...editErrors, description: "" });
                 }
@@ -386,7 +392,9 @@ function ServicesList() {
               className={`w-full ${editErrors.description ? "ng-invalid" : ""}`}
             />
             {editErrors.description && (
-              <p className="text-red-500 text-sm mt-1">{editErrors.description}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {editErrors.description}
+              </p>
             )}
           </div>
         </div>

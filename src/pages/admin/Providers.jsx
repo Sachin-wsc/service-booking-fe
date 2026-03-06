@@ -21,7 +21,7 @@ function Providers() {
       setLoading(true);
       const response = await adminAPI.getPendingProviders();
       const allProviders = response.data || [];
-
+      
       // Filter for pending providers only
       const pendingProviders = allProviders.filter(
         (provider) => provider.status === "pending"
@@ -41,6 +41,8 @@ function Providers() {
       setLoading(false);
     }
   };
+
+  
 
   const handleApproveProvider = async (providerId) => {
     try {

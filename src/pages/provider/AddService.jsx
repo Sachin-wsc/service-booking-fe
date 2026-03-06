@@ -17,16 +17,6 @@ function AddService() {
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-  const [service, setService] = useState({
-    name: "",
-    category_id: null,
-    price: null,
-    description: "",
-  });
-
-  const [errors, setErrors] = useState({});
-
-  // Fetch categories on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -52,6 +42,17 @@ function AddService() {
 
     fetchCategories();
   }, []);
+
+  
+
+  const [service, setService] = useState({
+    name: "",
+    category_id: null,
+    price: null,
+    description: "",
+  });
+
+  const [errors, setErrors] = useState({});
 
   const handleChange = (field, value) => {
     setService({ ...service, [field]: value });
@@ -184,6 +185,7 @@ function AddService() {
               <Dropdown
                 value={service.category_id}
                 options={categories}
+                
                 onChange={(e) => handleChange("category_id", e.value)}
                 placeholder={
                   categoriesLoading
@@ -193,7 +195,7 @@ function AddService() {
                 className={`w-full ${
                   errors.category_id ? "ng-invalid ng-touched" : ""
                 }`}
-                disabled={categoriesLoading || categories.length === 0}
+                // disabled 
               />
               {errors.category_id && (
                 <p className="text-red-500 text-sm flex items-center gap-1">
@@ -206,7 +208,7 @@ function AddService() {
             {/* Price */}
             <div className="flex flex-col gap-2">
               <label className="font-semibold text-gray-700">
-                Price (₹) <span className="text-red-500">*</span>
+                Price (₹) <span className="text-red-500!">*</span>
               </label>
               <InputNumber
                 value={service.price}
@@ -254,7 +256,6 @@ function AddService() {
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row justify-end gap-4 mt-8 border-t pt-6">
-            
             <Button
               label="Reset"
               icon="pi pi-refresh"

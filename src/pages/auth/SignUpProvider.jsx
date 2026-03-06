@@ -8,8 +8,10 @@ import { InputMask } from "primereact/inputmask";
 import { Checkbox } from "primereact/checkbox";
 import { Steps } from "primereact/steps";
 import { Toast } from "primereact/toast";
+import { Dropdown } from "primereact/dropdown";
 import Address from "../../components/Address";
 import { registerUser, clearError } from "../../features/authSlice";
+import { categoryAPI } from "../../services/api";
 
 const SignUpProvider = () => {
   const navigate = useNavigate();
@@ -18,6 +20,8 @@ const SignUpProvider = () => {
   const { loading, error } = useSelector((state) => state.auth);
   const [activeStep, setActiveStep] = useState(0);
   const [checked, setChecked] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const [form, setForm] = useState({
     name: "",
@@ -32,6 +36,7 @@ const SignUpProvider = () => {
     zip: "",
     businessName: "",
     description: "",
+    category_id: null,
   });
 
   const [errors, setErrors] = useState({
@@ -47,6 +52,7 @@ const SignUpProvider = () => {
     zip: "",
     businessName: "",
     description: "",
+    category_id: "",
   });
 
   const steps = [
@@ -69,6 +75,33 @@ const SignUpProvider = () => {
       });
     }
   }, [error]);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await categoryAPI.getCategories();
+        const categoryList = (response.data || []).map((cat) => ({
+          label: cat.name,
+          value: cat.id,
+        }));
+        setCategories(categoryList);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to load categories",
+          life: 3000,
+        });
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -150,6 +183,10 @@ const SignUpProvider = () => {
         newErrors.businessName = "Business name must be at least 3 characters";
       }
 
+      if (!form.category_id) {
+        newErrors.category_id = "Please select a business category";
+      }
+
       if (!form.description.trim()) {
         newErrors.description = "Business description is required";
       } else if (form.description.trim().length < 10) {
@@ -187,6 +224,7 @@ const SignUpProvider = () => {
           zip: form.zip,
           Buisness_name: form.businessName,
           description: form.description,
+          category_id: form.category_id,
         }),
       );
 
@@ -211,7 +249,7 @@ const SignUpProvider = () => {
               email: form.email,
             },
           });
-        }, 4000);
+        }, 3000);
       }
     }
   };
@@ -433,6 +471,36 @@ const SignUpProvider = () => {
                     <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
                       <i className="pi pi-exclamation-circle text-xs"></i>
                       {errors.description}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">
+                    Select your business category{" "}
+                    <span className="text-red-600!">*</span>
+                  </label>
+                  <Dropdown
+                    value={form.category_id}
+                    options={categories}
+                    onChange={(e) => {
+                      setForm({ ...form, category_id: e.value });
+                      if (errors.category_id) {
+                        setErrors({ ...errors, category_id: "" });
+                      }
+                    }}
+                    placeholder={
+                      categoriesLoading
+                        ? "Loading categories..."
+                        : "Select your business category"
+                    }
+                    className="w-full text-sm"
+                    disabled={categoriesLoading || categories.length === 0}
+                  />
+                  {errors.category_id && (
+                    <p className="text-red-600! text-xs font-medium mt-1 flex items-center gap-1">
+                      <i className="pi pi-exclamation-circle text-xs"></i>
+                      {errors.category_id}
                     </p>
                   )}
                 </div>

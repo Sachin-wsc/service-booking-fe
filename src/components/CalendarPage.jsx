@@ -77,7 +77,7 @@ function CalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gray-100 p-2">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">
         Your Events Calendar
       </h1>

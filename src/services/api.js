@@ -27,6 +27,7 @@ export const authAPI = {
 };
 
 export const providerAPI = {
+
   // Service Management
   createService: (serviceData) => api.post("/provider/service", serviceData),
   getServices: () => api.get("/provider/services"),
@@ -37,7 +38,9 @@ export const providerAPI = {
   // Availability Management
   addAvailability: (availabilityData) => api.post("/provider/availability", availabilityData),
   getAvailability: (serviceId) => api.get(`/provider/service/${serviceId}/availability`),
+  getAvailabilityById: (id) => api.get(`/provider/availability/${id}`),
   updateAvailability: (id, availabilityData) => api.put(`/provider/availability/${id}`, availabilityData),
+  toggleAvailabilityStatus: (id, is_available) => api.patch(`/provider/availability/${id}/status`, { is_available }),
   deleteAvailability: (id) => api.delete(`/provider/availability/${id}`),
   
   // Booking Management
@@ -61,6 +64,19 @@ export const categoryAPI = {
   create: (categoryData) => api.post("/admin/category", categoryData),
   update: (id, categoryData) => api.put(`/admin/category/${id}`, categoryData),
   delete: (id) => api.delete(`/admin/category/${id}`),
+};
+
+export const customerAPI = {
+  // Service Browsing
+  getAllServices: () => api.get("/services"),
+  getAvailableServices: () => api.get("/services/available"),
+  getServiceById: (id) => api.get(`/services/${id}`),
+  getServiceAvailability: (id, date) => api.get(`/services/${id}/availability`, { params: { date } }),
+  
+  // Booking
+  createBooking: (bookingData) => api.post("/customer/booking", bookingData),
+  getMyBookings: () => api.get("/customer/bookings"),
+  getBookingById: (id) => api.get(`/customer/booking/${id}`),
 };
 
 export default api;
