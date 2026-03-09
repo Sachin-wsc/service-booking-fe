@@ -1,9 +1,16 @@
+import React, { useRef } from "react";
+import { useSelector } from "react-redux";
 import { Card } from "primereact/card";
+import { Toast } from "primereact/toast";
 import CalendarPage from "../../components/CalendarPage";
 
 const ProviderDashboard = () => {
+  const { user } = useSelector((state) => state.auth);
+  const toastRef = useRef(null);
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-10">
+      <Toast ref={toastRef} />
       <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="mb-5">

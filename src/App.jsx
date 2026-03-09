@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import ProviderDashboard from "./pages/provider/ProviderDashboard";
 import ProviderPending from "./pages/provider/ProviderPending";
+import ProviderLayout from "./pages/provider/ProviderLayout";
 
 import AllServices from "./pages/customer/AllServices";
 import CustomerBookingPage from "./pages/customer/CustomerBookingPage";
@@ -101,42 +102,50 @@ function App() {
             />
           }
         />
+        {/* layout wrapper for authenticated provider pages */}
         <Route
-          path="/provider/dashboard"
+          path="/provider"
           element={
             <ProtectedRoute
-              component={ProviderDashboard}
+              component={ProviderLayout}
               allowedRoles={["provider"]}
             />
           }
-        />
-        <Route
-          path="/provider/add-service"
-          element={
-            <ProtectedRoute
-              component={AddService}
-              allowedRoles={["provider"]}
-            />
-          }
-        />
-        <Route
-          path="/provider/services"
-          element={
-            <ProtectedRoute
-              component={ServicesList}
-              allowedRoles={["provider"]}
-            />
-          }
-        />
-        <Route
-          path="/provider/availability"
-          element={
-            <ProtectedRoute
-              component={Availability}
-              allowedRoles={["provider"]}
-            />
-          }
-        />
+        >
+          <Route
+            path="dashboard"
+            element={<ProviderDashboard />}
+          />
+          <Route
+            path="add-service"
+            element={<AddService />}
+          />
+          <Route
+            path="services"
+            element={<ServicesList />}
+          />
+          <Route
+            path="availability"
+            element={<Availability />}
+          />
+          {/* placeholder routes for sidebar links - can be created later */}
+          <Route
+            path="bookings"
+            element={<div>Bookings page</div>}
+          />
+          <Route
+            path="reviews"
+            element={<div>Reviews page</div>}
+          />
+          <Route
+            path="profile"
+            element={<div>Profile page</div>}
+          />
+          <Route
+            path="earnings"
+            element={<div>Earnings page</div>}
+          />
+        </Route>
 
         {/*  Customer Routes */}
         <Route
