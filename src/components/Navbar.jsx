@@ -84,11 +84,6 @@ function Navbar() {
             path: "/provider/dashboard",
           },
           {
-            label: "Add Service",
-            icon: "pi pi-plus",
-            path: "/provider/add-service",
-          },
-          {
             label: "My Services",
             icon: "pi pi-list",
             path: "/provider/services",

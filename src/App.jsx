@@ -20,8 +20,7 @@ import AllServices from "./pages/customer/AllServices";
 import CustomerBookingPage from "./pages/customer/CustomerBookingPage";
 import ServiceDetail from "./pages/customer/ServiceDetail";
 
-import AddService from "./pages/provider/AddService";
-import ServicesList from "./pages/provider/ServicesList";
+import Services from "./pages/provider/Services";
 import Availability from "./pages/provider/Availability";
 
 import Navbar from "./components/Navbar";
@@ -45,6 +44,7 @@ function App() {
     "/signup/provider",
     "/signup/customer",
     "/provider/pending",  
+    // "/admin/dashboard",
   ];
 
   const shouldHide = hideRoutes.includes(location.pathname);
@@ -111,19 +111,10 @@ function App() {
           }
         />
         <Route
-          path="/provider/add-service"
-          element={
-            <ProtectedRoute
-              component={AddService}
-              allowedRoles={["provider"]}
-            />
-          }
-        />
-        <Route
           path="/provider/services"
           element={
             <ProtectedRoute
-              component={ServicesList}
+              component={Services}
               allowedRoles={["provider"]}
             />
           }
