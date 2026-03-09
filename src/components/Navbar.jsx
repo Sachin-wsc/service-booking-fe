@@ -42,40 +42,82 @@ function Navbar() {
     }
   };
 
-  const goDashboard = () => {
-    if (user?.role === "admin") navigate("/admin/dashboard");
-    else if (user?.role === "provider") navigate("/provider/dashboard");
-    else navigate("/customer/dashboard");
+  const isActive = (path) => location.pathname === path;
+
+  // Role-based navigation items
+  const getNavItems = () => {
+    if (!user) return [];
+
+    switch (user.role) {
+      case "admin":
+        return [
+          // { label: "Dashboard", icon: "pi pi-home", path: "/admin/dashboard" },
+          // { label: "Users", icon: "pi pi-users", path: "/admin/users" },
+          // { label: "Providers", icon: "pi pi-check-circle", path: "/admin/providers" },
+          // { label: "Categories", icon: "pi pi-tag", path: "/admin/categories" },
+        ];
+      case "customer":
+        return [
+          {
+            label: "Dashboard",
+            icon: "pi pi-home",
+            path: "/customer/dashboard",
+          },
+          {
+            label: "Services",
+            icon: "pi pi-list",
+            path: "/customer/all-services",
+          },
+          {
+            label: "My Bookings",
+            icon: "pi pi-calendar",
+            path: "/customer/my-bookings",
+          },
+          {
+            label: "History",
+            icon: "pi pi-history",
+            path: "/customer/history",
+          },
+        ];
+      case "provider":
+        return [
+          {
+            label: "Dashboard",
+            icon: "pi pi-home",
+            path: "/provider/dashboard",
+          },
+          {
+            label: "Add Service",
+            icon: "pi pi-plus",
+            path: "/provider/add-service",
+          },
+          {
+            label: "My Services",
+            icon: "pi pi-list",
+            path: "/provider/services",
+          },
+          {
+            label: "Availability",
+            icon: "pi pi-calendar",
+            path: "/provider/availability",
+          },
+          {
+            label: "Bookings",
+            icon: "pi pi-inbox",
+            path: "/provider/bookings",
+          },
+          {
+            label: "Earnings",
+            icon: "pi pi-wallet",
+            path: "/provider/earnings",
+          },
+        ];
+      default:
+        return [];
+    }
   };
 
-  const handleSettings = () => {
-    navigate("/settings");
-  };
-
-  const profileMenuItems = [
-    {
-      label: user?.name || "User",
-      icon: "pi pi-user",
-      disabled: true,
-      className: "text-gray-600 font-semibold",
-    },
-    {
-      separator: true,
-    },
-    {
-      label: "Settings",
-      icon: "pi pi-cog",
-      command: handleSettings,
-    },
-    {
-      separator: true,
-    },
-    {
-      label: "Logout",
-      icon: "pi pi-sign-out",
-      command: handleLogout,
-    },
-  ];
+  const navItems = getNavItems();
 
   return (
     <>

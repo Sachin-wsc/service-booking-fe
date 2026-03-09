@@ -5,9 +5,9 @@ import AllUsers from "./AllUsers.jsx";
 import Providers from "./Providers.jsx";
 import Categories from "./Categories.jsx";
 import CalendarPage from "../../components/CalendarPage.jsx";
+import AdminSidebar from "../../components/AdminSidebar.jsx";
 
 function AdminDashboard() {
-  const { user } = useSelector((state) => state.auth);
   const toastRef = useRef(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -15,7 +15,6 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Toast ref={toastRef} />
-      
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Menu Overlay */}
@@ -27,8 +26,15 @@ function AdminDashboard() {
         )}
 
         {/* SIDEBAR - Desktop */}
-        <div className="hidden md:flex md:w-64 bg-gradient-to-br from-blue-600 via-cyan-500 to-sky-500 flex-col shadow-lg">
-          
+        <div className="hidden md:flex md:w-64 bg-white border-r border-gray-200 flex-col shadow-sm">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-2xl font-bold bg-linear-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+              Admin Panel
+            </h2>
+            <p className="text-gray-500 text-sm mt-2 font-medium">
+              {user?.name || "Admin"}
+            </p>
+          </div>
 
           <nav className="space-y-1 p-4 flex-1 overflow-y-auto">
             {/* Dashboard */}
@@ -36,8 +42,8 @@ function AdminDashboard() {
               onClick={() => setActiveTab("dashboard")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "dashboard"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-home text-lg"></i>
@@ -49,8 +55,8 @@ function AdminDashboard() {
               onClick={() => setActiveTab("category")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "category"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-tag text-lg"></i>
@@ -62,8 +68,8 @@ function AdminDashboard() {
               onClick={() => setActiveTab("providers")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "providers"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-check-circle text-lg"></i>
@@ -75,8 +81,8 @@ function AdminDashboard() {
               onClick={() => setActiveTab("users")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "users"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-users text-lg"></i>
@@ -87,15 +93,18 @@ function AdminDashboard() {
 
         {/* SIDEBAR - Mobile */}
         <div
-          className={`fixed left-0 top-0 w-64 h-full bg-gradient-to-br from-blue-600 via-cyan-500 to-sky-500 flex flex-col shadow-lg z-40 transform transition-transform duration-300 md:hidden ${
+          className={`fixed left-0 top-0 w-64 h-full bg-white border-r border-gray-200 flex flex-col shadow-lg z-40 transform transition-transform duration-300 md:hidden ${
             showMobileMenu ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{ top: "64px" }}
         >
-          <div className="p-6 border-b border-white/20">
-            <h2 className="text-2xl font-bold text-white">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-2xl font-bold bg-linear-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
               Admin Panel
             </h2>
+            <p className="text-gray-500 text-sm mt-2 font-medium">
+              {user?.name || "Admin"}
+            </p>
           </div>
 
           <nav className="space-y-1 p-4 flex-1 overflow-y-auto">
@@ -107,8 +116,8 @@ function AdminDashboard() {
               }}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "dashboard"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-home text-lg"></i>
@@ -123,8 +132,8 @@ function AdminDashboard() {
               }}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "category"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-tag text-lg"></i>
@@ -139,8 +148,8 @@ function AdminDashboard() {
               }}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "providers"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-check-circle text-lg"></i>
@@ -155,8 +164,8 @@ function AdminDashboard() {
               }}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-3 font-medium ${
                 activeTab === "users"
-                  ? "bg-white/20 text-white border-l-4 border-white shadow-lg backdrop-blur-sm"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               <i className="pi pi-users text-lg"></i>
@@ -191,7 +200,6 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }
